@@ -144,7 +144,7 @@ class ResetPasswordRequestToken(GenericAPIView):
         clear_expired(now_minus_expiry_time)
 
         # find a user by email address (case insensitive search)
-        users = User.objects.filter(**{'{}__iexact'.format(get_password_reset_lookup_field()): email})
+        users = self.get_users(email)
 
         active_user_found = False
 
@@ -186,6 +186,9 @@ class ResetPasswordRequestToken(GenericAPIView):
                 reset_password_token_created.send(sender=self.__class__, instance=self, reset_password_token=token)
         # done
         return Response({'status': 'OK'})
+
+    def get_users(self, value):
+        return User.objects.filter(**{'{}__iexact'.format(get_password_reset_lookup_field()): value})
 
 
 reset_password_validate_token = ResetPasswordValidateToken.as_view()
